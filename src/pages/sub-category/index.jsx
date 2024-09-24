@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { GlobalTable, CategoryModal } from "../../components";
-import { categories } from "../../service";
-import { Button, Input, Space } from "antd";
-import {
-   EditOutlined,
-   DeleteOutlined,
-   FolderViewOutlined,
-} from "@ant-design/icons";
-import { useNavigate } from "react-router";
+import { GlobalTable, SubCategoryModal } from "../../components";
+import { subCategory } from "../../service";
+import { Button, Input, Space, message } from "antd";
+import { useParams, useNavigate } from "react-router-dom";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+
 const { Search } = Input;
+
 const Index = () => {
+   const { id } = useParams();
+   const navigate = useNavigate();
    const [open, setOpen] = useState(false);
    const [data, setData] = useState([]);
    const [update, setUpdate] = useState({});
-   const navigate = useNavigate();
+   const [loading, setLoading] = useState(false);
+   const [searchTerm, setSearchTerm] = useState("");
+
    const openModal = () => {
       setOpen(true);
    };
+
    const handleClose = () => {
       setOpen(false);
    };
+
    const columns = [
       {
          title: "№",
@@ -27,7 +31,6 @@ const Index = () => {
          key: "id",
          align: "center",
       },
-
       {
          title: "Category name",
          dataIndex: "name",
@@ -49,44 +52,56 @@ const Index = () => {
                >
                   <EditOutlined />
                </Button>
-               <Button
-                  style={{ marginLeft: "10px" }}
-                  onClick={() => viewCategory(item.id)}
-               >
-                  <FolderViewOutlined />
-               </Button>
             </div>
          ),
       },
    ];
+
    const getCategory = async () => {
-      const response = await categories.read();
-      if (response.status === 200) {
-         setData(response?.data?.data?.categories);
+      setLoading(true);
+      try {
+         const response = await subCategory.read(id);
+         if (response.status === 200) {
+            setData(response?.data?.data?.subcategories);
+         }
+      } catch (error) {
+         message.error("Failed to load categories");
+      } finally {
+         setLoading(false);
       }
    };
+
    const deleteCategory = async (id) => {
-      const response = await categories.delete(id);
-      if (response.status === 200) {
-         getCategory();
+      try {
+         const response = await subCategory.delete(id);
+         if (response.status === 200) {
+            getCategory();
+         }
+      } catch (error) {
+         message.error("Failed to delete category");
       }
    };
-   const editCategory = async (item) => {
+
+   const editCategory = (item) => {
       setUpdate(item);
       setOpen(true);
    };
-   const viewCategory = async (id) => {
-      navigate(`/user-layout/categories/${id}`);
+
+   const onSearch = (value) => {
+      setSearchTerm(value);
    };
+
+   const filteredData = data.filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+   );
+
    useEffect(() => {
       getCategory();
    }, []);
-   const onSearch = (value, _e, info) => {
-      console.log(value, _e, info);
-   };
+
    return (
       <div>
-         <CategoryModal
+         <SubCategoryModal
             open={open}
             handleClose={handleClose}
             update={update}
@@ -107,8 +122,9 @@ const Index = () => {
          </div>
          <GlobalTable
             columns={columns}
-            data={data}
+            data={filteredData}
             pagination={{ pageSize: 5 }}
+            loading={loading}
          />
       </div>
    );

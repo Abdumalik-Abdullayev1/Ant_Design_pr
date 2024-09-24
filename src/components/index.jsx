@@ -1,4 +1,5 @@
 import CategoryModal from './category-modal'
-import CategoryTable from './category-table'
+import SubCategoryModal from './sub-ctegory-modal'
+import GlobalTable from './global-table'
 
-export { CategoryTable, CategoryModal }
+export { GlobalTable, CategoryModal, SubCategoryModal }

@@ -1,26 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  ProductOutlined,
-  AppstoreOutlined,
-  AppstoreAddOutlined,
-  SettingOutlined,
-  StockOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { user } from '../../router/routes'
 
 const { Header, Sider, Content } = Layout;
 
 const Index = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [selectedKey, setSelectedKey] = useState("")
+  const { pathname } = useLocation()
   const navigate = useNavigate();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  useEffect(() => {
+    let index = user.findIndex((item) => item.path === pathname)
+    setSelectedKey(index.toString())
+  }, [pathname])
 
   const handleClick = () => {
     navigate('/');
@@ -34,20 +38,16 @@ const Index = () => {
           <img className="w-1/3" src={logo} alt="Logo" />
           <h1 className="w-2/3 text-white p-6 bg-dark-blue font-bold text-lg">TechnoArt</h1>
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={['2']}
-          items={[
-            { key: '1', icon: <ProductOutlined />, label: 'Products' },
-            { key: '2', icon: <AppstoreOutlined />, label: 'Categories' },
-            { key: '3', icon: <AppstoreOutlined />, label: 'Brands' },
-            { key: '4', icon: <AppstoreAddOutlined />, label: 'Brand Category' },
-            { key: '5', icon: <AppstoreOutlined />, label: 'Ads' },
-            { key: '6', icon: <StockOutlined />, label: 'Stock' },
-            { key: '7', icon: <SettingOutlined />, label: 'Settings' },
-          ]}
-        />
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            items={user.map((item, index) => ({
+              key: index.toString(),
+              icon: item.icon,
+              label: <NavLink to={item.path} className='text-white'>{item.content}</NavLink>
+            }))}
+          />
       </Sider>
       <Layout>
         <Header
