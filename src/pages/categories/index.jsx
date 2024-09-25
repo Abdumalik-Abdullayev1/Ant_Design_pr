@@ -1,25 +1,51 @@
 import React, { useEffect, useState } from "react";
-import { GlobalTable, CategoryModal } from "../../components";
-import { categories } from "../../service";
-import { Button, Input, Space } from "antd";
+import { Button, Input, Space, Tooltip } from "antd";
 import {
    EditOutlined,
    DeleteOutlined,
    FolderViewOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
-const { Search } = Input;
+import { Category } from "@modals"
+import { categories } from "@service";
+import { GlobalTable } from "@components";
+
+
 const Index = () => {
-   const [open, setOpen] = useState(false);
    const [data, setData] = useState([]);
-   const [update, setUpdate] = useState({});
+   const [total, setTotal] = useState()
+   const [open, setOpen] = useState(false)
+   const [update, setUpdate] = useState({})
    const navigate = useNavigate();
-   const openModal = () => {
-      setOpen(true);
+   const [params, setParams] = useState({
+      search: "",
+      limit: 2,
+      page: 1
+   })
+   const getCategory = async () => {
+      try {
+         const res = await categories.read(params)
+         setData(res?.data?.data?.categories)
+         setTotal(res?.data?.data?.count)
+      } catch (err) {
+         console.log("Error");
+      }
+   }
+   const handleTableChange = (pagination) => {
+      const { current, pageSize } = pagination
+      setParams((prev) => ({ ...prev, limit: pageSize, page: current }));
    };
-   const handleClose = () => {
-      setOpen(false);
-   };
+   const editItem = (item) => {
+      setUpdate(item)
+      setOpen(true)
+   }
+   const deleteItem = async(id)=>{
+      const res = await categories.delete(id)
+      if(res.status === 200){
+         getCategory()
+      }
+   }
+
    const columns = [
       {
          title: "№",
@@ -35,82 +61,52 @@ const Index = () => {
          align: "center",
       },
       {
-         title: "Action",
-         key: "action",
-         align: "center",
-         render: (item) => (
-            <div>
-               <Button onClick={() => deleteCategory(item.id)}>
-                  <DeleteOutlined />
-               </Button>
-               <Button
-                  style={{ marginLeft: "10px" }}
-                  onClick={() => editCategory(item)}
-               >
-                  <EditOutlined />
-               </Button>
-               <Button
-                  style={{ marginLeft: "10px" }}
-                  onClick={() => viewCategory(item.id)}
-               >
-                  <FolderViewOutlined />
-               </Button>
-            </div>
+         title: 'Action',
+         key: 'action',
+         render: (_, record) => (
+            <Space size="middle">
+               <Tooltip title="edit">
+                  <Button type="default" onClick={() => editItem(record)} icon={<EditOutlined />} />
+               </Tooltip>
+               <Tooltip title="delete">
+                  <Button type="default" onClick={() => deleteItem(record.id)} icon={<DeleteOutlined />} />
+               </Tooltip>
+               <Tooltip title="delete">
+                  <Button type="default" onClick={() => viewCategory(record.id)} icon={<FolderViewOutlined />} />
+               </Tooltip>
+            </Space>
          ),
       },
    ];
-   const getCategory = async () => {
-      const response = await categories.read();
-      if (response.status === 200) {
-         setData(response?.data?.data?.categories);
-      }
-   };
-   const deleteCategory = async (id) => {
-      const response = await categories.delete(id);
-      if (response.status === 200) {
-         getCategory();
-      }
-   };
-   const editCategory = async (item) => {
-      setUpdate(item);
-      setOpen(true);
-   };
+   useEffect(() => {
+      getCategory();
+   }, [params]);
+
+   const handleClose =()=>{
+      setOpen(false)
+      setUpdate({})
+   }
    const viewCategory = async (id) => {
       navigate(`/user-layout/categories/${id}`);
    };
-   useEffect(() => {
-      getCategory();
-   }, []);
-   const onSearch = (value, _e, info) => {
-      console.log(value, _e, info);
-   };
+
    return (
-      <div>
-         <CategoryModal
-            open={open}
-            handleClose={handleClose}
-            update={update}
-            setUpdate={setUpdate}
-            getCategory={getCategory}
-         />
-         <div className="flex justify-between mb-4">
-            <Space direction="vertical">
-               <Search
-                  placeholder="Search category"
-                  onSearch={onSearch}
-                  allowClear
-               />
-            </Space>
-            <Button onClick={openModal}>
-               <span className="ml-2">Add new category</span>
-            </Button>
-         </div>
-         <GlobalTable
-            columns={columns}
-            data={data}
-            pagination={{ pageSize: 5 }}
-         />
-      </div>
+      <>
+      <Category open={open} handleClose={handleClose} update={update} getCategory={getCategory} />
+      <Button type="default" onClick={()=> setOpen(true)}>Add category</Button>
+      <GlobalTable
+         columns={columns}
+         data={data}
+         pagination={{
+            current: params.page,
+            pageSize: params.limit,
+            total: total,
+            showSizeChanger: true,
+            pageSizeOptions: ['2', '5', '7', '10', '12']
+         }}
+         handleChange={handleTableChange}
+      />
+   </>
    );
 };
 

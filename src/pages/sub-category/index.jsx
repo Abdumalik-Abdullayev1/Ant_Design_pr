@@ -1,28 +1,51 @@
 import React, { useEffect, useState } from "react";
-import { GlobalTable, SubCategoryModal } from "../../components";
-import { subCategory } from "../../service";
-import { Button, Input, Space, message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Space, Tooltip } from "antd";
+import {
+   EditOutlined,
+   DeleteOutlined,
+} from "@ant-design/icons";
+import { SubCategory } from "@modals"
+import { subCategory } from "@service";
+import { GlobalTable } from "@components";
 
-const { Search } = Input;
 
 const Index = () => {
-   const { id } = useParams();
-   const navigate = useNavigate();
-   const [open, setOpen] = useState(false);
    const [data, setData] = useState([]);
-   const [update, setUpdate] = useState({});
+   const [total, setTotal] = useState()
+   const [open, setOpen] = useState(false)
    const [loading, setLoading] = useState(false);
-   const [searchTerm, setSearchTerm] = useState("");
-
-   const openModal = () => {
-      setOpen(true);
+   const [update, setUpdate] = useState({})
+   const [params, setParams] = useState({
+      search: "401",
+      limit: 2,
+      page: 1
+   })
+   const getSubCategory = async () => {
+      setLoading(true);
+      try {
+         const res = await subCategory.read(params);
+         setData(res?.data?.data?.subcategories);
+         setTotal(res?.data?.data?.count);
+      } catch (err) {
+         console.error("Error fetching categories:", err);
+      } finally {
+         setLoading(false);
+      }
    };
-
-   const handleClose = () => {
-      setOpen(false);
+   const handleTablesChange = (pagination) => {
+      const { current, pageSize } = pagination
+      setParams((prev) => ({ ...prev, limit: pageSize, page: current }));
    };
+   const editItem = (item) => {
+      setUpdate(item)
+      setOpen(true)
+   }
+   const deleteItem = async(id)=>{
+      const res = await subCategory.delete(id)
+      if(res.status === 200){
+         getSubCategory()
+      }
+   }
 
    const columns = [
       {
@@ -31,6 +54,7 @@ const Index = () => {
          key: "id",
          align: "center",
       },
+
       {
          title: "Category name",
          dataIndex: "name",
@@ -38,95 +62,47 @@ const Index = () => {
          align: "center",
       },
       {
-         title: "Action",
-         key: "action",
-         align: "center",
-         render: (item) => (
-            <div>
-               <Button onClick={() => deleteCategory(item.id)}>
-                  <DeleteOutlined />
-               </Button>
-               <Button
-                  style={{ marginLeft: "10px" }}
-                  onClick={() => editCategory(item)}
-               >
-                  <EditOutlined />
-               </Button>
-            </div>
+         title: 'Action',
+         key: 'action',
+         render: (_, record) => (
+            <Space size="middle">
+               <Tooltip title="edit">
+                  <Button type="default" onClick={() => editItem(record)} icon={<EditOutlined />} />
+               </Tooltip>
+               <Tooltip title="delete">
+                  <Button type="default" onClick={() => deleteItem(record.id)} icon={<DeleteOutlined />} />
+               </Tooltip>
+            </Space>
          ),
       },
    ];
-
-   const getCategory = async () => {
-      setLoading(true);
-      try {
-         const response = await subCategory.read(id);
-         if (response.status === 200) {
-            setData(response?.data?.data?.subcategories);
-         }
-      } catch (error) {
-         message.error("Failed to load categories");
-      } finally {
-         setLoading(false);
-      }
-   };
-
-   const deleteCategory = async (id) => {
-      try {
-         const response = await subCategory.delete(id);
-         if (response.status === 200) {
-            getCategory();
-         }
-      } catch (error) {
-         message.error("Failed to delete category");
-      }
-   };
-
-   const editCategory = (item) => {
-      setUpdate(item);
-      setOpen(true);
-   };
-
-   const onSearch = (value) => {
-      setSearchTerm(value);
-   };
-
-   const filteredData = data.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-   );
-
    useEffect(() => {
-      getCategory();
-   }, []);
+      getSubCategory();
+   }, [params]);
+
+   const handleClose =()=>{
+      setOpen(false)
+      setUpdate({})
+   }
 
    return (
-      <div>
-         <SubCategoryModal
-            open={open}
-            handleClose={handleClose}
-            update={update}
-            setUpdate={setUpdate}
-            getCategory={getCategory}
-         />
-         <div className="flex justify-between mb-4">
-            <Space direction="vertical">
-               <Search
-                  placeholder="Search category"
-                  onSearch={onSearch}
-                  allowClear
-               />
-            </Space>
-            <Button onClick={openModal}>
-               <span className="ml-2">Add new category</span>
-            </Button>
-         </div>
-         <GlobalTable
-            columns={columns}
-            data={filteredData}
-            pagination={{ pageSize: 5 }}
-            loading={loading}
-         />
-      </div>
+      <>
+      <SubCategory open={open} handleClose={handleClose} update={update} getSubCategory={getSubCategory} />
+      <Button type="default" onClick={()=> setOpen(true)}>Add category</Button>
+      <GlobalTable
+         columns={columns}
+         data={data}
+         loading={loading}
+         pagination={{
+            current: params.page,
+            pageSize: params.limit,
+            total: total,
+            showSizeChanger: true,
+            pageSizeOptions: ['2', '5', '7', '10', '12']
+         }}
+         handleChange={handleTablesChange}
+      />
+   </>
    );
 };
 
