@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Button, Space, Tooltip } from "antd";
 import {
    EditOutlined,
@@ -16,16 +17,19 @@ const Index = () => {
    const [loading, setLoading] = useState(false);
    const [update, setUpdate] = useState({})
    const [params, setParams] = useState({
-      search: "401",
+      search: "",
       limit: 2,
       page: 1
    })
+   const { id } = useParams()
    const getSubCategory = async () => {
       setLoading(true);
       try {
-         const res = await subCategory.read(params);
-         setData(res?.data?.data?.subcategories);
-         setTotal(res?.data?.data?.count);
+         const res = await subCategory.read(id);
+         if(res.status === 201){
+            setData(res?.data?.data?.subcategories);
+            setTotal(res?.data?.data?.count);
+         }
       } catch (err) {
          console.error("Error fetching categories:", err);
       } finally {
@@ -54,9 +58,8 @@ const Index = () => {
          key: "id",
          align: "center",
       },
-
       {
-         title: "Category name",
+         title: "Sub Category name",
          dataIndex: "name",
          key: "name",
          align: "center",
@@ -88,7 +91,7 @@ const Index = () => {
    return (
       <>
       <SubCategory open={open} handleClose={handleClose} update={update} getSubCategory={getSubCategory} />
-      <Button type="default" onClick={()=> setOpen(true)}>Add category</Button>
+      <Button type="default" onClick={()=> setOpen(true)}>Add sub category</Button>
       <GlobalTable
          columns={columns}
          data={data}

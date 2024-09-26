@@ -5,7 +5,7 @@ import {
    DeleteOutlined,
    FolderViewOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Category } from "@modals"
 import { categories } from "@service";
 import { GlobalTable } from "@components";
@@ -16,6 +16,7 @@ const Index = () => {
    const [total, setTotal] = useState()
    const [open, setOpen] = useState(false)
    const [update, setUpdate] = useState({})
+   const { search } = useLocation()
    const navigate = useNavigate();
    const [params, setParams] = useState({
       search: "",
@@ -34,6 +35,11 @@ const Index = () => {
    const handleTableChange = (pagination) => {
       const { current, pageSize } = pagination
       setParams((prev) => ({ ...prev, limit: pageSize, page: current }));
+      const search_params = new URLSearchParams(search)
+      search_params.set('page', `${current}`)
+      search_params.set('limit', `${pageSize}`)
+      navigate(`?${search_params}`)
+
    };
    const editItem = (item) => {
       setUpdate(item)
@@ -81,6 +87,12 @@ const Index = () => {
    useEffect(() => {
       getCategory();
    }, [params]);
+   useEffect(()=>{
+      const params = new URLSearchParams(search)
+      let page = Number(params.get("page")) || 1
+      let limit = Number(params.get("limit")) || 2
+      setParams((prev) => ({ ...prev, limit: limit, page: page }));
+   },[search])
 
    const handleClose =()=>{
       setOpen(false)

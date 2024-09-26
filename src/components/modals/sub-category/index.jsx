@@ -1,13 +1,12 @@
 import { Button, Form, Input, Modal } from 'antd'
 import { useEffect, useState } from 'react';
-import { categories } from '@service'
-import { useForm } from 'antd/es/form/Form';
+import { subCategory } from '@service'
 
-const Index = ({ open, handleClose, update, getSubCategory }) => {
+const Index = ({ open, handleClose, update, getSubCategory, id }) => {
     const [loading, setLoading] = useState(false)
-    const [form] = useForm();
+    const [form] = Form.useForm();
     useEffect(() => {
-        if (update) {
+        if (update.id) {
             form.setFieldsValue({
                 name: update.name
             })
@@ -21,14 +20,20 @@ const Index = ({ open, handleClose, update, getSubCategory }) => {
         setLoading(true)
         try {
             if (update.id) {
-                const response = await categories.update(update.id, values);
+                const response = await subCategory.update(update.id, {
+                    name: values.name,
+                    parent_category_id: parseInt(id),
+                });
                 if (response.status === 200) {
                     handleClose();
                     getSubCategory();
                     form.resetFields();
                 }
             } else {
-                const response = await categories.create(values);
+                const response = await subCategory.create({
+                    name: values.name,
+                    parent_category_id: parseInt(id),
+                });
                 if (response.status === 201) {
                     handleClose();
                     getSubCategory();
@@ -46,18 +51,18 @@ const Index = ({ open, handleClose, update, getSubCategory }) => {
         <>
             <Modal
                 open={open}
-                title="Add new category"
+                title="Add new sub category"
                 onCancel={handleClose}
                 width={500}
                 footer={false}
             >
                 <Form form={form} id="basic" name="categoryForm" onFinish={onFinish} layout='vertical'>
                     <Form.Item
-                        label="Category name"
+                        label="Sub Category name"
                         name="name"
                         labelCol={{ span: 24 }}
                         wrIndexerCol={{ span: 24 }}
-                        rules={[{ required: true, message: "Please input category name!" }]}
+                        rules={[{ required: true, message: "Please input sub category name!" }]}
                     >
                         <Input size='large' />
                     </Form.Item>
@@ -69,7 +74,7 @@ const Index = ({ open, handleClose, update, getSubCategory }) => {
                             htmlType='Submit'
                             loading={loading}
                         >
-                            add
+                            Add
                         </Button>
                     </Form.Item>
                 </Form>
