@@ -1,3 +1,4 @@
 import GlobalTable from './global-table'
+import ConfirmDelete from './confirm-delete'
 
-export { GlobalTable }
+export { GlobalTable, ConfirmDelete }

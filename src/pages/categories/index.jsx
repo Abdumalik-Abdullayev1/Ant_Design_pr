@@ -8,7 +8,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { Category } from "@modals"
 import { categories } from "@service";
-import { GlobalTable } from "@components";
+import { GlobalTable, ConfirmDelete } from "@components";
 
 
 const Index = () => {
@@ -45,7 +45,7 @@ const Index = () => {
       setUpdate(item)
       setOpen(true)
    }
-   const deleteItem = async(id)=>{
+   const handleDelete = async(id)=>{
       const res = await categories.delete(id)
       if(res.status === 200){
          getCategory()
@@ -75,9 +75,9 @@ const Index = () => {
                   <Button type="default" onClick={() => editItem(record)} icon={<EditOutlined />} />
                </Tooltip>
                <Tooltip title="delete">
-                  <Button type="default" onClick={() => deleteItem(record.id)} icon={<DeleteOutlined />} />
+                  <ConfirmDelete id={record.id} deleteItem={handleDelete} />
                </Tooltip>
-               <Tooltip title="delete">
+               <Tooltip title="view more">
                   <Button type="default" onClick={() => viewCategory(record.id)} icon={<FolderViewOutlined />} />
                </Tooltip>
             </Space>

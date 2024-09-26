@@ -26,7 +26,7 @@ const Index = () => {
       setLoading(true);
       try {
          const res = await subCategory.read(id);
-         if(res.status === 201){
+         if(res.status === 200){
             setData(res?.data?.data?.subcategories);
             setTotal(res?.data?.data?.count);
          }

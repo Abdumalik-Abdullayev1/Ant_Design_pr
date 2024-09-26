@@ -8,12 +8,13 @@ const Index = ({ open, handleClose, update, getSubCategory, id }) => {
     useEffect(() => {
         if (update.id) {
             form.setFieldsValue({
-                name: update.name
+                name: update.name,
+                parent_category_id: Number(id),
             })
         } else {
             form.resetFields()
         }
-    }, [update, form])
+    }, [update, form, id])
 
 
     const onFinish = async (values) => {
@@ -22,7 +23,7 @@ const Index = ({ open, handleClose, update, getSubCategory, id }) => {
             if (update.id) {
                 const response = await subCategory.update(update.id, {
                     name: values.name,
-                    parent_category_id: parseInt(id),
+                    parent_category_id: values.parent_category_id,
                 });
                 if (response.status === 200) {
                     handleClose();
@@ -32,9 +33,10 @@ const Index = ({ open, handleClose, update, getSubCategory, id }) => {
             } else {
                 const response = await subCategory.create({
                     name: values.name,
-                    parent_category_id: parseInt(id),
+                    parent_category_id: values.Number(id),
                 });
-                if (response.status === 201) {
+                console.log(parent_category_id);
+                if (response.status === 200) {
                     handleClose();
                     getSubCategory();
                     form.resetFields();
@@ -63,6 +65,15 @@ const Index = ({ open, handleClose, update, getSubCategory, id }) => {
                         labelCol={{ span: 24 }}
                         wrIndexerCol={{ span: 24 }}
                         rules={[{ required: true, message: "Please input sub category name!" }]}
+                    >
+                        <Input size='large' />
+                    </Form.Item>
+                    <Form.Item
+                        label="Sub Category id"
+                        name="parent_category_id"
+                        labelCol={{ span: 24 }}
+                        wrIndexerCol={{ span: 24 }}
+                        rules={[{ required: true, message: "Please input sub category id!" }]}
                     >
                         <Input size='large' />
                     </Form.Item>
