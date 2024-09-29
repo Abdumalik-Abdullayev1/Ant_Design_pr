@@ -19,12 +19,12 @@ const user = [
     },
     {
         content: "Brands",
-        path: "/user-layout",
+        path: "/user-layout/brand",
         icon: <AppstoreOutlined/>
     },
     {
-        content: "Products",
-        path: "/user-layout",
+        content: "Brand category",
+        path: "/user-layout/brand-category",
         icon: <AppstoreAddOutlined/>
     },
     {

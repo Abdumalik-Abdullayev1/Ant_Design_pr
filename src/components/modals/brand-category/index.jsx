@@ -1,49 +1,58 @@
-import { Button, Form, Input, Modal } from 'antd'
+import { Button, Form, Input, Modal, Select } from 'antd'
 import { useEffect, useState } from 'react';
-import { subCategory } from '@service'
+import { brandCategory, brand } from '@service'
 import { useParams } from 'react-router-dom';
 
-const Index = ({ open, handleClose, update, getSubCategory }) => {
-    const {id} = useParams()
+const Index = ({ open, handleClose, update, getBrandCategory }) => {
+    const { id } = useParams()
     const [loading, setLoading] = useState(false)
+    const [brands, setBrands] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
     const [form] = Form.useForm();
     useEffect(() => {
         if (update.id) {
             form.setFieldsValue({
                 name: update.name,
-                parent_category_id: Number(id),
+                brand_id: parseInt(id)
             })
+            setSelectedItems(update.brandId || [])
         }
     }, [update, id])
-
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const res = await brand.read(id);
+            setBrands(res?.data?.data?.brands || []);
+        };
+        fetchCategories();
+    }, []);
 
     const onFinish = async (values) => {
-        setLoading(true)
+        console.log(values);
+        setLoading(true);
         try {
+            const brandId = selectedItems.map(item => Number(item));
             if (update.id) {
-                const response = await subCategory.update(update.id, values,{
-                    name: values.name,
-                    parent_category_id: Number(id),
+                await brandCategory.update(update.id, {
+                    ...values,
+                    brand_id: Number(brandId),
                 });
-                handleClose();
-                getSubCategory();
-                form.resetFields();
             } else {
-                const response = await subCategory.create({
+                await brandCategory.create({
+                    ...values,
                     name: values.name,
-                    parent_category_id: Number(id),
+                    brand_id: Number(brandId),
                 });
-                handleClose();
-                getSubCategory();
-                form.resetFields();
             }
+            handleClose();
+            getBrandCategory();
+            form.resetFields();
         } catch (error) {
             console.log(error);
         }
-        setLoading(false)
-        handleClose()
-
+        setLoading(false);
+        handleClose();
     };
+
     return (
         <>
             <Modal
@@ -62,6 +71,15 @@ const Index = ({ open, handleClose, update, getSubCategory }) => {
                         rules={[{ required: true, message: "Please input sub category name!" }]}
                     >
                         <Input size='large' />
+                    </Form.Item>
+                    <Form.Item label="*Select brand" name="brand_id" rules={[{ required: true, message: "Please select brand!" }]}>
+                        <Select
+                            mode="multiple"
+                            value={selectedItems}
+                            onChange={setSelectedItems}
+                            style={{ width: '100%', marginBottom: "15px" }}
+                            options={brands.map(item => ({ value: item.id, label: item.name }))}
+                        />
                     </Form.Item>
                     <Form.Item >
                         <Button

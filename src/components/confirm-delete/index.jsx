@@ -8,7 +8,7 @@ const App = ({deleteItem, id}) => {
     return (
         <Popconfirm
             title="Delete the task"
-            description="Are you sure to delete this task?"
+            description={`Are you sure to delete ${id}?`}
             okText="Yes"
             cancelText="No"
             onConfirm={handleDelete}

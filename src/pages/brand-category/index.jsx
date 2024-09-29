@@ -4,8 +4,8 @@ import { Button, Space, Tooltip } from "antd";
 import {
    EditOutlined,
 } from "@ant-design/icons";
-import { SubCategory } from "@modals"
-import { subCategory } from "@service";
+import { BrandCategory } from "@modals"
+import { brandCategory } from "@service";
 import { GlobalTable, ConfirmDelete } from "@components";
 
 
@@ -23,12 +23,12 @@ const Index = () => {
    const { id } = useParams()
    const { search } = useLocation()
    const navigate = useNavigate();
-   const getSubCategory = async () => {
+   const getBrandCategory = async () => {
       setLoading(true);
       try {
-         const res = await subCategory.read(id);
+         const res = await brandCategory.read(id);
          if(res.status === 200){
-            setData(res?.data?.data?.subcategories);
+            setData(res?.data?.data?.brandCategories);
             setTotal(res?.data?.data?.count);
          }
       } catch (err) {
@@ -50,9 +50,9 @@ const Index = () => {
       setOpen(true)
    }
    const deleteItem = async(id)=>{
-      const res = await subCategory.delete(id)
+      const res = await brandCategory.delete(id)
       if(res.status === 200){
-         getSubCategory()
+         getBrandCategory()
       }
    }
 
@@ -85,7 +85,7 @@ const Index = () => {
       },
    ];
    useEffect(() => {
-      getSubCategory();
+      getBrandCategory();
    }, [params]);
    useEffect(()=>{
       const params = new URLSearchParams(search)
@@ -110,7 +110,7 @@ const Index = () => {
 
    return (
       <>
-      <SubCategory open={open} handleClose={handleClose} update={update} getSubCategory={getSubCategory} />
+      <BrandCategory open={open} handleClose={handleClose} update={update} getBrandCategory={getBrandCategory} />
       <input placeholder="Search..." onChange={handleSearch} />
       <Button type="default" onClick={()=> setOpen(true)}>Add sub category</Button>
       <GlobalTable

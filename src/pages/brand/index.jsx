@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Space, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
 import {
    EditOutlined,
-   FolderViewOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Category } from "@modals"
-import { categories } from "@service";
+import { Brand } from "@modals"
+import { categories, brand } from "@service";
 import { GlobalTable, ConfirmDelete } from "@components";
 
 
@@ -15,6 +14,7 @@ const Index = () => {
    const [total, setTotal] = useState()
    const [open, setOpen] = useState(false)
    const [update, setUpdate] = useState({})
+   const [category, setCategory] = useState({})
    const { search } = useLocation()
    const navigate = useNavigate();
    const [params, setParams] = useState({
@@ -22,17 +22,17 @@ const Index = () => {
       limit: 2,
       page: 1
    })
-   const getCategory = async () => {
+   const getBrand = async () => {
       try {
-         const res = await categories.read(params)
-         setData(res?.data?.data?.categories)
+         const res = await brand.read(params)
+         setData(res?.data?.data?.brands)
          setTotal(res?.data?.data?.count)
       } catch (err) {
          console.log("Error");
       }
    }
    useEffect(() => {
-      getCategory();
+      getBrand();
    }, [params]);
    useEffect(()=>{
       const params = new URLSearchParams(search)
@@ -46,9 +46,11 @@ const Index = () => {
       setOpen(false)
       setUpdate({})
    }
-   const viewCategory = async (id) => {
-      navigate(`/user-layout/categories/${id}`);
-   };
+   const openModal = async()=>{
+      const res = await categories.read()
+      setCategory(res?.data?.data?.categories)
+      setOpen(true)
+   }
    const handleTableChange = (pagination) => {
       const { current, pageSize } = pagination
       setParams((prev) => ({ ...prev, limit: pageSize, page: current }));
@@ -63,9 +65,9 @@ const Index = () => {
       setOpen(true)
    }
    const handleDelete = async(id)=>{
-      const res = await categories.delete(id)
+      const res = await brand.delete(id)
       if(res.status === 200){
-         getCategory()
+         getBrand()
       }
    }
    const handleSearch =(event)=>{
@@ -85,7 +87,7 @@ const Index = () => {
       },
 
       {
-         title: "Category name",
+         title: "Brand name",
          dataIndex: "name",
          key: "name",
          align: "center",
@@ -101,9 +103,6 @@ const Index = () => {
                <Tooltip title="delete">
                   <ConfirmDelete id={record.id} deleteItem={handleDelete} />
                </Tooltip>
-               <Tooltip title="view more">
-                  <Button type="default" onClick={() => viewCategory(record.id)} icon={<FolderViewOutlined />} />
-               </Tooltip>
             </Space>
          ),
       },
@@ -111,9 +110,9 @@ const Index = () => {
 
    return (
       <>
-      <Category open={open} handleClose={handleClose} update={update} getCategory={getCategory} />
+      <Brand open={open} handleClose={handleClose} update={update} getBrand={getBrand} category={category} />
       <input type="text" className="outline-none" placeholder="Search..." onChange={handleSearch} />
-      <Button type="default" onClick={()=> setOpen(true)}>Add category</Button>
+      <Button type="default" onClick={openModal}>Add brand</Button>
       <GlobalTable
          columns={columns}
          data={data}

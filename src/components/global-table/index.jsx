@@ -6,6 +6,7 @@ const Index = ({columns, data, pagination, handleChange}) => (
     dataSource={data}
     pagination={pagination}
     onChange={(pagination) => handleChange(pagination)}
+    className='mt-5'
     />
 )
 export default Index;

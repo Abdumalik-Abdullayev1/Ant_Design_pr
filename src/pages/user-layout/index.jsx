@@ -27,6 +27,7 @@ const Index = () => {
   }, [pathname])
 
   const handleClick = () => {
+    localStorage.clear()
     navigate('/');
   };
 
@@ -68,7 +69,7 @@ const Index = () => {
             }}
           />
           <button className="flex gap-3 items-center mx-6 text-base" onClick={handleClick}>
-            <LogoutOutlined />
+            <LogoutOutlined/>
             <h3>Logout</h3>
           </button>
         </Header>
