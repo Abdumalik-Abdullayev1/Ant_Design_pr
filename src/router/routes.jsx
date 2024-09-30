@@ -30,11 +30,6 @@ const user = [
     {
         content: "Products",
         path: "/user-layout",
-        icon: <AppstoreOutlined/>
-    },
-    {
-        content: "Products",
-        path: "/user-layout",
         icon: <StockOutlined/>
     },
     {
