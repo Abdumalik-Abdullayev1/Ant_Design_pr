@@ -37,13 +37,13 @@ const Index = () => {
          setLoading(false);
       }
    };
-   const handleTablesChange = (pagination) => {
+   const handleTableChange = (pagination) => {
       const { current, pageSize } = pagination
       setParams((prev) => ({ ...prev, limit: pageSize, page: current }));
-      const current_params = new URLSearchParams(search)
-      current_params.set('page', `${current}`)
-      current_params.set('limit', `${pageSize}`)
-      navigate(`?${current_params}`)
+      const search_params = new URLSearchParams(search)
+      search_params.set('page', `${current}`)
+      search_params.set('limit', `${pageSize}`)
+      navigate(`?${search_params}`)
    };
    const editItem = (item) => {
       setUpdate(item)
@@ -89,10 +89,10 @@ const Index = () => {
    }, [params]);
    useEffect(()=>{
       const params = new URLSearchParams(search)
-      let serach_val = params.get("search") || ""
+      let search_val = params.get("search") || ""
       let page = Number(params.get("page")) || 1
       let limit = Number(params.get("limit")) || 2
-      setParams((prev) => ({ ...prev, limit: limit, page: page, serach_val: serach_val }));
+      setParams((prev) => ({ ...prev, limit: limit, page: page, serach_val: search_val }));
    },[search])
 
    const handleClose =()=>{
@@ -101,17 +101,16 @@ const Index = () => {
    }
    const handleSearch =(event)=>{
       const value = event.target.value
-      console.log(value);
       setParams((prev) => ({...prev, search: value}))
-      const current_params = new URLSearchParams(search)
-      current_params.set("search", value)
-      navigate(`?${current_params}`)
+      const search_params = new URLSearchParams(search)
+      search_params.set("search", value)
+      navigate(`?${search_params}`)
    }
 
    return (
       <>
       <BrandCategory open={open} handleClose={handleClose} update={update} getBrandCategory={getBrandCategory} />
-      <input placeholder="Search..." onChange={handleSearch} />
+      <input type="text" placeholder="Search..." className="outline-none" onChange={handleSearch} />
       <Button type="default" onClick={()=> setOpen(true)}>Add sub category</Button>
       <GlobalTable
          columns={columns}
@@ -124,7 +123,7 @@ const Index = () => {
             showSizeChanger: true,
             pageSizeOptions: ['2', '5', '7', '10', '12']
          }}
-         handleChange={handleTablesChange}
+         handleChange={handleTableChange}
       />
    </>
    );

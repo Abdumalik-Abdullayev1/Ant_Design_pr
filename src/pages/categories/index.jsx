@@ -60,7 +60,7 @@ const Index = () => {
    };
    const editItem = (item) => {
       setUpdate(item)
-      setOpen(true)
+      setOpen(true) 
    }
    const handleDelete = async(id)=>{
       const res = await categories.delete(id)

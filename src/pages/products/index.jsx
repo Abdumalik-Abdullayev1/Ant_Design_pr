@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Input, Space, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
 import {
    EditOutlined,
    FolderViewOutlined,
@@ -47,7 +47,7 @@ const Index = () => {
       setUpdate({})
    }
    const viewCategory = async (id) => {
-      navigate(`/user-layout/categories/${id}`);
+      navigate(`/user-layout/products/${id}`);
    };
    const handleTableChange = (pagination) => {
       const { current, pageSize } = pagination

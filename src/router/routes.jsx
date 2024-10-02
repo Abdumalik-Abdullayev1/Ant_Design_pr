@@ -28,12 +28,12 @@ const user = [
         icon: <AppstoreAddOutlined/>
     },
     {
-        content: "Products",
+        content: "Ads",
         path: "/user-layout",
         icon: <StockOutlined/>
     },
     {
-        content: "Products",
+        content: "Settings",
         path: "/user-layout",
         icon: <SettingOutlined/>
     },

@@ -69,7 +69,7 @@ const Index = ({ open, handleClose, update, getBrand }) => {
                 >
                     <Input size='large' />
                 </Form.Item>
-                <Form.Item label="*Select brand" rules={[{ required: true, message: "Please select brand!" }]}>
+                <Form.Item label="*Select category" rules={[{ required: true, message: "Please select brand!" }]}>
                     <Select
                         mode="multiple"
                         name="select"

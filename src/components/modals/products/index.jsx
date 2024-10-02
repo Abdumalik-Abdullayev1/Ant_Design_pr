@@ -1,68 +1,90 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Drawer, Form, Input, Select } from 'antd'
+import { Button, Drawer, Form, Input, Select, Upload } from 'antd'
 import { useForm } from 'antd/es/form/Form';
+import { UploadOutlined } from "@ant-design/icons";
 import { brand, brandCategory, categories, products } from '@service'
 
-const App = ({open, handleClose, update }) => {
+const App = ({ open, handleClose, update }) => {
   const [form] = useForm();
   const [loading, setLoading] = useState(false)
   const [width, setWidth] = useState(600)
-  const [file, setFile] = useState("")
-  const [category, setCategory] = useState([])
-  const [brands, setBrands] = useState([])
-  const [brandCategories, setBrandCategories] = useState([])
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
-  const [selectedBrandCategories, setSelectedBrandCategories] = useState([]);
-  useEffect(() => {
-    const getRequests = async () => {
-      try {
-        const res = await categories.read();
-        setCategory(res?.data?.data?.categories || []);
-        const resp = await brand.read()
-        setBrands(resp?.data?.data?.brands || [])
-        const response = await brandCategory.read()
-        setBrandCategories(response?.data?.data?.brandCategories || [])
-      } catch (error) {
-        console.error('Failed to fetch categories', error);
+  const [categoryData, setCategoryData] = useState([])
+  const [brandData, setBrandData] = useState([])
+  const [brandCategoryData, setBrandCategoryData] = useState([])
+  const getCategory = async () => {
+    try{
+      const res = await categories.read();
+      if(res.status === 200){
+        setCategoryData(res?.data?.data?.categories);
       }
-    };
-    getRequests();
-  }, []);
-  useEffect(() => {
-    if (update) {
-        form.setFieldsValue({ 
-          name: update.name,
-          price: update.price,
-          category_id: update.category_id,
-          brand_id: update.brand_id,
-          brand_category_id: update.brand_category_id
-        });
-    } else {
-        form.resetFields();
+    }catch(err){
+      console.error(err);
     }
-}, [update, form]);
+  };
 
-  const handleChange = (event) => {
-    setFile(event.target.files[0])
+  useEffect(() => {
+    getCategory()
+  }, [])
+  useEffect(() => {
+    if (update.id) {
+      form.setFieldsValue({
+        name: update.name,
+        price: update.price,
+        category_id: update.category_id,
+        brand_id: update.brand_id,
+        brand_category_id: update.brand_category_id
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [update, form]);
+
+  const handleChange = async (value, inputName) => {
+    try {
+      if (inputName === "category_id") {
+        const res = await brand.getCategory(value);
+        setBrandData(res?.data?.data?.brands);
+      } else if (inputName === "brand_id") {
+        const res = await brandCategory.getBrand(value);
+        setBrandCategoryData(res?.data?.data?.brandCategories);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
   const onFinish = async (values) => {
     setLoading(true);
+    const editData = {
+      name: values.name,
+      price: parseInt(values.price),
+      category_id: parseInt(values.category_id),
+      brand_id: parseInt(values.brand_id),
+      brand_category_id: parseInt(values.brand_category_id),
+    };
     const formData = new FormData()
     formData.append("name", values.name)
     formData.append("price", values.price)
     formData.append("category_id", values.category_id)
     formData.append("brand_id", values.brand_id)
     formData.append("brand_category_id", values.brand_category_id)
-    formData.append("file", values.file)
+    if (values.file && values.file.file) {
+      formData.append("file", values.file.file)
+    }
     try {
-      const response = update.id ?
-        await products.update(update.id, formData) :
-        await products.create(formData);
-      if (response.status === (update.id ? 200 : 201)) {
-        handleClose();
-        getRequests();
-        form.resetFields();
+      if (update.id) {
+        const res = await products.update(update.id, editData)
+        if (res.status === 200) {
+          handleClose();
+          getRequests();
+          form.resetFields();
+        }
+      } else {
+        const res = await products.create(formData)
+        if (res.status === 201) {
+          handleClose();
+          getRequests();
+          form.resetFields();
+        }
       }
     } catch (error) {
       console.log(error);
@@ -97,33 +119,74 @@ const App = ({open, handleClose, update }) => {
             </Form.Item>
             <Form.Item label="Select category" name="category_id" rules={[{ required: true, message: "Please select brand!" }]}>
               <Select
-                mode="multiple"
-                value={selectedCategories}
-                onChange={setSelectedCategories}
-                style={{ width: '100%', marginBottom: "15px" }}
-                options={category.map(item => ({ value: item.id, label: item.name }))}
-              />
+                allowClear
+                showSearch
+                onChange={(value) =>
+                  handleChange(value, "category_id")
+                }
+              >
+                {categoryData?.map((item, index) => (
+                  <Option value={item.id} key={index}>
+                    {item.name}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
             <Form.Item label="Select brand name" name="brand_id" rules={[{ required: true, message: "Please select brand!" }]}>
               <Select
-                mode="multiple"
-                value={selectedBrands}
-                onChange={setSelectedBrands}
-                style={{ width: '100%', marginBottom: "15px" }}
-                options={brands.map(item => ({ value: item.id, label: item.name }))}
-              />
+                allowClear
+                showSearch
+                onChange={(value) => handleChange(value, "brand_id")}
+                disabled={!form.getFieldValue("category_id")}
+              >
+                {brandData?.map((item, index) => (
+                  <Option value={item.id} key={index}>
+                    {item.name}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
             <Form.Item label="Select brand category" name="brand_category_id" rules={[{ required: true, message: "Please select brand!" }]}>
               <Select
-                mode="multiple"
-                value={selectedBrandCategories}
-                onChange={setSelectedBrandCategories}
-                style={{ width: '100%', marginBottom: "15px" }}
-                options={brandCategories.map(item => ({ value: item.id, label: item.name }))}
-              />
+                allowClear
+                showSearch
+                onChange={(value) =>
+                  handleChange(value, "brand_category_id")
+                }
+                disabled={!form.getFieldValue("brand_id")}
+              >
+                {brandCategoryData?.map((item, index) => (
+                  <Option value={item.id} key={index}>
+                    {item.name}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
-            <Form.Item className='flex items-center mt-4'>
-              <input type="file" onChange={handleChange} />
+            <Form.Item
+              name="files"
+              label="Product image"
+              rules={[
+                {
+                  required: true,
+                  message: "Please upload product image",
+                },
+              ]}
+            >
+              <Upload
+                beforeUpload={() => false}
+                maxCount={5}
+                listType="picture"
+                action={
+                  "https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                }
+              >
+                <Button
+                  className="w-full"
+                  icon={<UploadOutlined />}
+                >
+                  Upload Logo
+                </Button>
+              </Upload>
             </Form.Item>
           </div>
 

@@ -6,5 +6,7 @@ import Categories from './categories'
 import SubCategory from './sub-category'
 import Brand from './brand'
 import BrandCategory from './brand-category'
+import NotFound from './not-found'
+import Details from './product-details'
 
-export { SignIn, SignUp, UserLayout, Products, Categories, SubCategory, Brand, BrandCategory }
+export { SignIn, SignUp, UserLayout, Products, Categories, SubCategory, Brand, BrandCategory, NotFound, Details }
