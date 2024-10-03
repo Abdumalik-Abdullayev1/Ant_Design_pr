@@ -1,6 +1,20 @@
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import App from '../App';
-import { SignIn, UserLayout, SignUp, Products, Categories, SubCategory, Brand, BrandCategory, NotFound, Details } from "../pages";
+import {
+  SignIn,
+  SignUp,
+  UserLayout,
+  Products,
+  Categories,
+  SubCategory,
+  Brand,
+  BrandCategory,
+  NotFound,
+  Details,
+  Ads,
+  Stock,
+  Settings
+} from '@pages'
 
 const Router = () => {
   const router = createBrowserRouter(
@@ -15,6 +29,9 @@ const Router = () => {
           <Route path="categories/:id" element={<SubCategory />} />
           <Route path="brand" element={<Brand />} />
           <Route path="brand-category" element={<BrandCategory />} />
+          <Route path="ads" element={<Ads />} />
+          <Route path="stock" element={<Stock />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="*" element={<NotFound/>}/>
       </Route>

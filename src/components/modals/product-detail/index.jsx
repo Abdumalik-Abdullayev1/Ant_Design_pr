@@ -3,7 +3,7 @@ import { Button, Modal } from 'antd';
 import { Form, Input } from 'antd'
 import { productDetails } from '@service'
 
-const App = ({detail}) => {
+const App = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
         setIsModalOpen(true);

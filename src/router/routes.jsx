@@ -29,12 +29,17 @@ const user = [
     },
     {
         content: "Ads",
-        path: "/user-layout",
+        path: "/user-layout/ads",
+        icon: <AppstoreAddOutlined/>
+    },
+    {
+        content: "Stock",
+        path: "/user-layout/stock",
         icon: <StockOutlined/>
     },
     {
         content: "Settings",
-        path: "/user-layout",
+        path: "/user-layout/settings",
         icon: <SettingOutlined/>
     },
 ]

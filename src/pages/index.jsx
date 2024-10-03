@@ -8,5 +8,22 @@ import Brand from './brand'
 import BrandCategory from './brand-category'
 import NotFound from './not-found'
 import Details from './product-details'
+import Ads from './ads'
+import Stock from './stock'
+import Settings from './settings'
 
-export { SignIn, SignUp, UserLayout, Products, Categories, SubCategory, Brand, BrandCategory, NotFound, Details }
+export {
+    SignIn,
+    SignUp,
+    UserLayout,
+    Products,
+    Categories,
+    SubCategory,
+    Brand,
+    BrandCategory,
+    NotFound,
+    Details,
+    Ads,
+    Stock,
+    Settings
+}
