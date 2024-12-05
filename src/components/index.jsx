@@ -1,4 +1,4 @@
-import CategoryModal from './category-modal'
-import CategoryTable from './category-table'
+import GlobalTable from './global-table'
+import ConfirmDelete from './confirm-delete'
 
-export { CategoryTable, CategoryModal }
+export { GlobalTable, ConfirmDelete }

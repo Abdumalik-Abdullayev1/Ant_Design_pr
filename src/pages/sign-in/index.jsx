@@ -11,6 +11,10 @@ const Index = () => {
             const res = await auth.sign_in(values)
             if(res.status === 201){
                 navigate('/user-layout')
+                const token = res?.data?.data?.tokens?.access_token;
+                const userId = res?.data?.data?.data?.id;
+                localStorage.setItem("token", token)
+                localStorage.setItem("userId", userId);
             }
         }catch(err){
             console.log("Error");

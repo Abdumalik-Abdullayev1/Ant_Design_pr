@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Button, Space, Tooltip } from "antd";
 import {
    EditOutlined,
-   FolderViewOutlined,
 } from "@ant-design/icons";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Products } from "@modals"
-import { products } from "@service";
+import { BrandCategory } from "@modals"
+import { brandCategory } from "@service";
 import { GlobalTable, ConfirmDelete } from "@components";
 
 
@@ -14,40 +13,29 @@ const Index = () => {
    const [data, setData] = useState([]);
    const [total, setTotal] = useState()
    const [open, setOpen] = useState(false)
+   const [loading, setLoading] = useState(false);
    const [update, setUpdate] = useState({})
-   const { search } = useLocation()
-   const navigate = useNavigate();
    const [params, setParams] = useState({
       search: "",
       limit: 2,
       page: 1
    })
-   const getRequest = async () => {
+   const { id } = useParams()
+   const { search } = useLocation()
+   const navigate = useNavigate();
+   const getBrandCategory = async () => {
+      setLoading(true);
       try {
-         const res = await products.read(params)
-         setData(res?.data?.data?.products)
-         setTotal(res?.data?.data?.count)
+         const res = await brandCategory.read(id);
+         if(res.status === 200){
+            setData(res?.data?.data?.brandCategories);
+            setTotal(res?.data?.data?.count);
+         }
       } catch (err) {
-         console.log("Error");
+         console.error("Error fetching categories:", err);
+      } finally {
+         setLoading(false);
       }
-   }
-   useEffect(() => {
-      getRequest();
-   }, [params]);
-   useEffect(()=>{
-      const params = new URLSearchParams(search)
-      let page = Number(params.get("page")) || 1
-      let limit = Number(params.get("limit")) || 2
-      let serach_val = params.get("search_val")
-      setParams((prev) => ({ ...prev, limit: limit, page: page, serach_val: serach_val }));
-   },[search])
-
-   const handleClose =()=>{
-      setOpen(false)
-      setUpdate({})
-   }
-   const viewCategory = async (id) => {
-      navigate(`/user-layout/products/${id}`);
    };
    const handleTableChange = (pagination) => {
       const { current, pageSize } = pagination
@@ -56,24 +44,16 @@ const Index = () => {
       search_params.set('page', `${current}`)
       search_params.set('limit', `${pageSize}`)
       navigate(`?${search_params}`)
-
    };
    const editItem = (item) => {
       setUpdate(item)
       setOpen(true)
    }
-   const handleDelete = async(id)=>{
-      const res = await products.delete(id)
+   const deleteItem = async(id)=>{
+      const res = await brandCategory.delete(id)
       if(res.status === 200){
-         getRequest()
+         getBrandCategory()
       }
-   }
-   const handleSearch =(event)=>{
-      const value = event.target.value
-      setParams((prev) => ({...prev, search: value}))
-      const search_params = new URLSearchParams(search)
-      search_params.set("search", value)
-      navigate(`?${search_params}`)
    }
 
    const columns = [
@@ -84,7 +64,7 @@ const Index = () => {
          align: "center",
       },
       {
-         title: "Product name",
+         title: "Sub Category name",
          dataIndex: "name",
          key: "name",
          align: "center",
@@ -98,26 +78,44 @@ const Index = () => {
                   <Button type="default" onClick={() => editItem(record)} icon={<EditOutlined />} />
                </Tooltip>
                <Tooltip title="delete">
-                  <ConfirmDelete id={record.id} deleteItem={handleDelete} />
-               </Tooltip>
-               <Tooltip title="view more">
-                  <Button type="default" onClick={() => viewCategory(record.id)} icon={<FolderViewOutlined />} />
+                  <ConfirmDelete id={record.id} deleteItem={deleteItem} />
                </Tooltip>
             </Space>
          ),
       },
    ];
+   useEffect(() => {
+      getBrandCategory();
+   }, [params]);
+   useEffect(()=>{
+      const params = new URLSearchParams(search)
+      let search_val = params.get("search") || ""
+      let page = Number(params.get("page")) || 1
+      let limit = Number(params.get("limit")) || 2
+      setParams((prev) => ({ ...prev, limit: limit, page: page, serach_val: search_val }));
+   },[search])
+
+   const handleClose =()=>{
+      setOpen(false)
+      setUpdate({})
+   }
+   const handleSearch =(event)=>{
+      const value = event.target.value
+      setParams((prev) => ({...prev, search: value}))
+      const search_params = new URLSearchParams(search)
+      search_params.set("search", value)
+      navigate(`?${search_params}`)
+   }
 
    return (
       <>
-      <div className="flex justify-between">
-        <input type="text" className="outline-none" placeholder="Search..." onChange={handleSearch} />
-         <Products open={open} handleClose={handleClose} update={update} getRequest={getRequest} />
-         <Button type="default" onClick={()=> setOpen(true)}>Add product</Button>
-      </div>
+      <BrandCategory open={open} handleClose={handleClose} update={update} getBrandCategory={getBrandCategory} />
+      <input type="text" placeholder="Search..." className="outline-none" onChange={handleSearch} />
+      <Button type="default" onClick={()=> setOpen(true)}>Add sub category</Button>
       <GlobalTable
          columns={columns}
          data={data}
+         loading={loading}
          pagination={{
             current: params.page,
             pageSize: params.limit,

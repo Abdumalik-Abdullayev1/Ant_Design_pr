@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, Space, Tooltip } from "antd";
-import {
-   EditOutlined,
-   FolderViewOutlined,
-} from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Products } from "@modals"
-import { products } from "@service";
+import { EditOutlined } from "@ant-design/icons";
+import { Stock } from "@modals"
+import { stock } from "@service";
 import { GlobalTable, ConfirmDelete } from "@components";
 
 
@@ -22,17 +19,17 @@ const Index = () => {
       limit: 2,
       page: 1
    })
-   const getRequest = async () => {
+   const getStock = async () => {
       try {
-         const res = await products.read(params)
-         setData(res?.data?.data?.products)
+         const res = await stock.get(params)
+         setData(res?.data?.data?.stocks)
          setTotal(res?.data?.data?.count)
       } catch (err) {
          console.log("Error");
       }
    }
    useEffect(() => {
-      getRequest();
+      getStock();
    }, [params]);
    useEffect(()=>{
       const params = new URLSearchParams(search)
@@ -46,9 +43,6 @@ const Index = () => {
       setOpen(false)
       setUpdate({})
    }
-   const viewCategory = async (id) => {
-      navigate(`/user-layout/products/${id}`);
-   };
    const handleTableChange = (pagination) => {
       const { current, pageSize } = pagination
       setParams((prev) => ({ ...prev, limit: pageSize, page: current }));
@@ -58,15 +52,15 @@ const Index = () => {
       navigate(`?${search_params}`)
 
    };
+   const handleDelete = async(id)=>{
+      const res = await stock.delete(id)
+      if(res.status === 200){
+         getStock()
+      }
+   }
    const editItem = (item) => {
       setUpdate(item)
-      setOpen(true)
-   }
-   const handleDelete = async(id)=>{
-      const res = await products.delete(id)
-      if(res.status === 200){
-         getRequest()
-      }
+      setOpen(true) 
    }
    const handleSearch =(event)=>{
       const value = event.target.value
@@ -84,7 +78,7 @@ const Index = () => {
          align: "center",
       },
       {
-         title: "Product name",
+         title: "Stock name",
          dataIndex: "name",
          key: "name",
          align: "center",
@@ -100,9 +94,6 @@ const Index = () => {
                <Tooltip title="delete">
                   <ConfirmDelete id={record.id} deleteItem={handleDelete} />
                </Tooltip>
-               <Tooltip title="view more">
-                  <Button type="default" onClick={() => viewCategory(record.id)} icon={<FolderViewOutlined />} />
-               </Tooltip>
             </Space>
          ),
       },
@@ -110,11 +101,9 @@ const Index = () => {
 
    return (
       <>
-      <div className="flex justify-between">
-        <input type="text" className="outline-none" placeholder="Search..." onChange={handleSearch} />
-         <Products open={open} handleClose={handleClose} update={update} getRequest={getRequest} />
-         <Button type="default" onClick={()=> setOpen(true)}>Add product</Button>
-      </div>
+      <Stock open={open} handleClose={handleClose} update={update} getStock={getStock} />
+      <input type="text" className="outline-none" placeholder="Search..." onChange={handleSearch} />
+      <Button type="default" onClick={()=> setOpen(true)}>Add Stock</Button>
       <GlobalTable
          columns={columns}
          data={data}
